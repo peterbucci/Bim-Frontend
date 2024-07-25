@@ -3,59 +3,78 @@ package edu.bhcc.bim.websocket;
 import edu.bhcc.bim.model.Message;
 import edu.bhcc.bim.state.AppState;
 import javafx.application.Platform;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.simp.stomp.StompHeaders;
+import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.socket.messaging.WebSocketStompClient;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.lang.reflect.Type;
 
 public class WebSocketManager {
-    private WebSocketClient webSocketClient;
+    private WebSocketStompClient stompClient;
+    private StompSession stompSession;
+    private AppState appState;
+
+    public WebSocketManager(AppState appState) {
+        this.appState = appState;
+    }
 
     public void start() {
-        try {
-            webSocketClient = new WebSocketClient(new URI("ws://localhost:8080/ws")) {
-                @Override
-                public void onOpen(ServerHandshake handshake) {
-                    System.out.println("WebSocket opened");
-                }
+        System.out.println("Starting WebSocket connection");
+        StandardWebSocketClient client = new StandardWebSocketClient();
+        stompClient = new WebSocketStompClient(client);
+        stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+        System.out.println("Connecting to WebSocket server");
+        stompClient.connect("ws://localhost:8080/ws", new StompSessionHandlerAdapter() {
+            @Override
+            public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+                stompSession = session;
+                System.out.println("WebSocket connected");
 
-                @Override
-                public void onMessage(String message) {
-                    Platform.runLater(() -> handleMessage(message));
-                }
+                // Subscribe to the user-specific topic
+                stompSession.subscribe("/topic/messages/" + appState.getUserId(), new StompSessionHandlerAdapter() {
+                    @Override
+                    public void handleFrame(StompHeaders headers, Object payload) {
+                        handleMessage((Message) payload);
+                    }
 
-                @Override
-                public void onClose(int code, String reason, boolean remote) {
-                    System.out.println("WebSocket closed");
-                }
+                    @Override
+                    public Type getPayloadType(StompHeaders headers) {
+                        return Message.class;
+                    }
+                });
+            }
 
-                @Override
-                public void onError(Exception ex) {
-                    ex.printStackTrace();
-                }
-            };
-            webSocketClient.connect();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
+            @Override
+            public void handleTransportError(StompSession session, Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+    }
+
+    private void handleMessage(Message message) {
+        Platform.runLater(() -> {
+            appState.addMessage(message);
+            System.out.println("Handled message: " + message);
+        });
+    }
+
+    public void sendMessage(Message message) {
+        if (stompSession != null && stompSession.isConnected()) {
+            try {
+                System.out.println("Sending message: " + message);
+                stompSession.send("/app/message/" + 1, message); // Adjust this line
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private void handleMessage(String message) {
-        // Parse the message and update the state
-        // Assuming the message is a JSON string representing a Message object
-        Message newMessage = parseMessage(message);
-        AppState.getInstance().addMessage(newMessage);
-    }
-
-    private Message parseMessage(String message) {
-        // Implement message parsing logic
-        return new Message();
-    }
-
     public void stop() {
-        if (webSocketClient != null) {
-            webSocketClient.close();
+        if (stompSession != null) {
+            stompSession.disconnect();
         }
     }
 }

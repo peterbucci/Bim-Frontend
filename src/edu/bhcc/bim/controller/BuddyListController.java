@@ -1,10 +1,11 @@
 package edu.bhcc.bim.controller;
 
-import edu.bhcc.bim.service.FriendService;
-import edu.bhcc.bim.service.ConversationService;
 import edu.bhcc.bim.model.Conversation;
-import edu.bhcc.bim.model.User;
 import edu.bhcc.bim.model.FriendListViewItem;
+import edu.bhcc.bim.model.User;
+import edu.bhcc.bim.service.ConversationService;
+import edu.bhcc.bim.service.FriendService;
+import edu.bhcc.bim.state.AppState;
 import javafx.application.Platform;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
@@ -15,10 +16,12 @@ import java.util.Map;
 
 public class BuddyListController {
     private VBox view;
+    private AppState appState;
     private ListView<FriendListViewItem> friendsListView;
     private Map<String, Conversation> conversationMap;
 
-    public BuddyListController() {
+    public BuddyListController(AppState appState) {
+        this.appState = appState;
         this.conversationMap = new HashMap<>();
         initializeView();
         loadFriendsAndConversations();
@@ -64,9 +67,8 @@ public class BuddyListController {
 
     private void openChatWindow(String friendName) {
         Conversation conversation = conversationMap.get(friendName);
-        System.err.println("Conversation: " + conversation);
         if (conversation != null) {
-            ChatWindowController chatWindowController = new ChatWindowController(conversation);
+            ChatWindowController chatWindowController = new ChatWindowController(conversation, appState);
             chatWindowController.show();
         }
     }
