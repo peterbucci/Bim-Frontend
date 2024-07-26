@@ -1,8 +1,11 @@
 package edu.bhcc.bim.websocket;
 
+import edu.bhcc.bim.controller.ChatWindowController;
 import edu.bhcc.bim.model.Message;
 import edu.bhcc.bim.state.AppState;
 import javafx.application.Platform;
+import javafx.stage.Stage;
+
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
@@ -56,16 +59,34 @@ public class WebSocketManager {
 
     private void handleMessage(Message message) {
         Platform.runLater(() -> {
-            appState.addMessage(message);
-            System.out.println("Handled message: " + message);
+            ChatWindowController chatWindowController = appState.getOpenChatWindows().get(message.getSenderId());
+            if (chatWindowController != null) {
+                Stage chatWindow = chatWindowController.getStage();
+                chatWindow.toFront();
+                chatWindow.requestFocus();
+            } else {
+                chatWindowController = new ChatWindowController(
+                        appState.getConversationMap().get(message.getSenderId()), appState);
+                Stage chatWindow = chatWindowController.getStage();
+                chatWindowController.show();
+
+                // Add the new chat window controller to the map
+                appState.getOpenChatWindows().put(message.getSenderId(), chatWindowController);
+
+                // Remove the chat window from the map when it is closed
+                chatWindow.setOnCloseRequest(event -> appState.getOpenChatWindows().remove(message.getSenderId()));
+            }
+            chatWindowController.addMessage(message);
+            System.out.println("Handled message: " + appState.getConversationMap());
+            System.out.println("Handled message: " + message.getContent());
         });
     }
 
-    public void sendMessage(Message message) {
+    public void sendMessage(Message message, Integer recipientId) {
         if (stompSession != null && stompSession.isConnected()) {
             try {
                 System.out.println("Sending message: " + message);
-                stompSession.send("/app/message/" + 1, message); // Adjust this line
+                stompSession.send("/app/message/" + recipientId, message); // Adjust this line
             } catch (Exception e) {
                 e.printStackTrace();
             }

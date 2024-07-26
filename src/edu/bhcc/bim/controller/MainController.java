@@ -29,9 +29,9 @@ public class MainController {
             case "Buddy List":
                 BuddyListController buddyListController = new BuddyListController(appState);
                 return buddyListController.getView();
-            case "Chat":
-                ChatController chatController = new ChatController(this);
-                return chatController.getView();
+            case "Login":
+                LoginController loginController = new LoginController(appState, this);
+                return loginController.getView();
             default:
                 throw new IllegalArgumentException("Unknown view: " + viewName);
         }

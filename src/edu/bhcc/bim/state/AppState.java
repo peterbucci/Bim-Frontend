@@ -2,6 +2,7 @@ package edu.bhcc.bim.state;
 
 import edu.bhcc.bim.model.User;
 import edu.bhcc.bim.websocket.WebSocketManager;
+import edu.bhcc.bim.controller.ChatWindowController;
 import edu.bhcc.bim.model.Conversation;
 import edu.bhcc.bim.model.Message;
 import javafx.collections.FXCollections;
@@ -16,16 +17,16 @@ public class AppState {
     private ObservableList<Conversation> conversations;
     private ObservableList<Message> messages;
     private Map<Integer, Conversation> conversationMap;
+    private Map<Integer, ChatWindowController> openChatWindows;
     private WebSocketManager webSocketManager;
 
-    public AppState(int userId) {
-        this.userId = userId;
+    public AppState() {
         users = FXCollections.observableArrayList();
         conversations = FXCollections.observableArrayList();
         messages = FXCollections.observableArrayList();
         conversationMap = new HashMap<>();
+        this.openChatWindows = new HashMap<>();
         webSocketManager = new WebSocketManager(this);
-        webSocketManager.start();
     }
 
     public int getUserId() {
@@ -52,6 +53,10 @@ public class AppState {
         return conversationMap;
     }
 
+    public Map<Integer, ChatWindowController> getOpenChatWindows() {
+        return openChatWindows;
+    }
+
     public WebSocketManager getWebSocketManager() {
         return webSocketManager;
     }
@@ -62,22 +67,22 @@ public class AppState {
 
     public void addConversation(Conversation conversation) {
         conversations.add(conversation);
-        conversationMap.put(conversation.getConversationId(), conversation);
+        conversationMap.put(conversation.getParticipant().getUserId(), conversation);
     }
 
-    public void addMessage(Message message) {
+    public void addMessage(Message message, Integer userId) {
         messages.add(message);
         // Find the conversation and add the message to it
-        Conversation conversation = conversationMap.get(message.getConversationId());
+        Conversation conversation = conversationMap.get(userId);
         if (conversation != null) {
             conversation.getMessages().add(message);
         }
     }
 
-    public void removeMessage(Message message) {
+    public void removeMessage(Message message, Integer userId) {
         messages.remove(message);
         // Find the conversation and remove the message from it
-        Conversation conversation = conversationMap.get(message.getConversationId());
+        Conversation conversation = conversationMap.get(userId);
         if (conversation != null) {
             conversation.getMessages().remove(message);
         }

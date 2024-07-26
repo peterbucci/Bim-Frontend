@@ -8,16 +8,19 @@ public class Message {
     private String content;
     private Timestamp sentAt;
     private String sender;
+    private Integer senderId;
 
     public Message() {
     }
 
-    public Message(Integer messageId, Integer conversationId, String content, Timestamp sentAt, String sender) {
+    public Message(Integer messageId, Integer conversationId, String content, Timestamp sentAt, String sender,
+            Integer senderId) {
         this.messageId = messageId;
         this.conversationId = conversationId;
         this.content = content;
         this.sentAt = sentAt;
         this.sender = sender;
+        this.senderId = senderId;
     }
 
     // Getters and setters
@@ -59,5 +62,13 @@ public class Message {
 
     public void setSender(String sender) {
         this.sender = sender;
+    }
+
+    public Integer getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(Integer senderId) {
+        this.senderId = senderId;
     }
 }

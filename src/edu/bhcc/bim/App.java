@@ -6,17 +6,15 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 public class App extends Application {
-
-    // get appstate
     private AppState appState;
 
     @Override
     public void start(Stage primaryStage) {
-        appState = new AppState(1);
+        appState = new AppState();
         MainController mainController = new MainController(primaryStage, appState);
 
         // Set initial view
-        mainController.setView("Buddy List");
+        mainController.setView("Login");
     }
 
     public static void main(String[] args) {

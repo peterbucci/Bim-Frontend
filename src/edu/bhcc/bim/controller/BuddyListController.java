@@ -9,20 +9,17 @@ import edu.bhcc.bim.state.AppState;
 import javafx.application.Platform;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class BuddyListController {
     private VBox view;
     private AppState appState;
     private ListView<FriendListViewItem> friendsListView;
-    private Map<String, Conversation> conversationMap;
 
     public BuddyListController(AppState appState) {
         this.appState = appState;
-        this.conversationMap = new HashMap<>();
         initializeView();
         loadFriendsAndConversations();
     }
@@ -37,7 +34,7 @@ public class BuddyListController {
             if (event.getClickCount() == 2) {
                 FriendListViewItem selectedFriendItem = friendsListView.getSelectionModel().getSelectedItem();
                 if (selectedFriendItem != null) {
-                    openChatWindow(selectedFriendItem.getFriend().getUsername());
+                    openChatWindow(selectedFriendItem.getFriend().getUserId());
                 }
             }
         });
@@ -46,8 +43,8 @@ public class BuddyListController {
     private void loadFriendsAndConversations() {
         new Thread(() -> {
             try {
-                List<User> friends = FriendService.getFriendsWithStatus(1);
-                List<Conversation> conversations = ConversationService.getConversations(1);
+                List<User> friends = FriendService.getFriendsWithStatus(appState.getUserId());
+                List<Conversation> conversations = ConversationService.getConversations(appState.getUserId());
 
                 Platform.runLater(() -> {
                     friendsListView.getItems().clear();
@@ -56,7 +53,8 @@ public class BuddyListController {
                     }
 
                     for (Conversation conversation : conversations) {
-                        conversationMap.put(conversation.getParticipant().getUsername(), conversation);
+                        int userId = conversation.getParticipant().getUserId();
+                        appState.getConversationMap().put(userId, conversation);
                     }
                 });
             } catch (Exception e) {
@@ -65,12 +63,28 @@ public class BuddyListController {
         }).start();
     }
 
-    private void openChatWindow(String friendName) {
-        Conversation conversation = conversationMap.get(friendName);
-        if (conversation != null) {
-            ChatWindowController chatWindowController = new ChatWindowController(conversation, appState);
-            chatWindowController.show();
+    private void openChatWindow(Integer userId) {
+        ChatWindowController chatWindowController = appState.getOpenChatWindows().get(userId);
+        if (chatWindowController != null) {
+            // If the chat window is already open, bring it to the front
+            Stage chatWindow = chatWindowController.getStage();
+            chatWindow.toFront();
+            chatWindow.requestFocus();
+        } else {
+            Conversation conversation = appState.getConversationMap().get(userId);
+            if (conversation != null) {
+                chatWindowController = new ChatWindowController(conversation, appState);
+                Stage chatWindow = chatWindowController.getStage();
+                chatWindowController.show();
+
+                // Add the new chat window controller to the map
+                appState.getOpenChatWindows().put(userId, chatWindowController);
+
+                // Remove the chat window from the map when it is closed
+                chatWindow.setOnCloseRequest(event -> appState.getOpenChatWindows().remove(userId));
+            }
         }
+
     }
 
     public VBox getView() {
