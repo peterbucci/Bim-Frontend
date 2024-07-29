@@ -2,6 +2,7 @@ package edu.bhcc.bim.state;
 
 import edu.bhcc.bim.model.User;
 import edu.bhcc.bim.websocket.WebSocketManager;
+import edu.bhcc.bim.controller.BuddyListController;
 import edu.bhcc.bim.controller.ChatWindowController;
 import edu.bhcc.bim.model.Conversation;
 import edu.bhcc.bim.model.Message;
@@ -16,16 +17,19 @@ public class AppState {
     private ObservableList<User> users;
     private ObservableList<Conversation> conversations;
     private ObservableList<Message> messages;
+    private Map<Integer, User> userMap;
     private Map<Integer, Conversation> conversationMap;
     private Map<Integer, ChatWindowController> openChatWindows;
     private WebSocketManager webSocketManager;
+    private BuddyListController buddyListController;
 
     public AppState() {
         users = FXCollections.observableArrayList();
         conversations = FXCollections.observableArrayList();
         messages = FXCollections.observableArrayList();
+        userMap = new HashMap<>();
         conversationMap = new HashMap<>();
-        this.openChatWindows = new HashMap<>();
+        openChatWindows = new HashMap<>();
         webSocketManager = new WebSocketManager(this);
     }
 
@@ -49,6 +53,10 @@ public class AppState {
         return messages;
     }
 
+    public Map<Integer, User> getUserMap() {
+        return userMap;
+    }
+
     public Map<Integer, Conversation> getConversationMap() {
         return conversationMap;
     }
@@ -61,8 +69,21 @@ public class AppState {
         return webSocketManager;
     }
 
+    public BuddyListController getBuddyListController() {
+        return buddyListController;
+    }
+
+    public void setBuddyListController(BuddyListController buddyListController) {
+        this.buddyListController = buddyListController;
+    }
+
     public void addUser(User user) {
         users.add(user);
+        userMap.put(user.getUserId(), user);
+    }
+
+    public User getCurrentUser() {
+        return userMap.get(userId);
     }
 
     public void addConversation(Conversation conversation) {

@@ -5,17 +5,21 @@ public class User {
     private String username;
     private String status;
     private String lastActive;
-
-    // Constructor, getters, setters
+    private Friendship friendship;
 
     public User() {
     }
 
     public User(Integer userId, String username, String status, String lastActive) {
+        this(userId, username, status, lastActive, null);
+    }
+
+    public User(Integer userId, String username, String status, String lastActive, Friendship friendship) {
         this.userId = userId;
         this.username = username;
         this.status = status;
         this.lastActive = lastActive;
+        this.friendship = friendship;
     }
 
     public Integer getUserId() {
@@ -48,5 +52,13 @@ public class User {
 
     public void setLastActive(String lastActive) {
         this.lastActive = lastActive;
+    }
+
+    public Friendship getFriendship() {
+        return friendship;
+    }
+
+    public void setFriendship(Friendship friendship) {
+        this.friendship = friendship;
     }
 }

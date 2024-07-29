@@ -1,8 +1,11 @@
 package edu.bhcc.bim.websocket;
 
+import edu.bhcc.bim.controller.BuddyListController;
 import edu.bhcc.bim.controller.ChatWindowController;
 import edu.bhcc.bim.model.Message;
 import edu.bhcc.bim.state.AppState;
+import edu.bhcc.bim.model.Friendship;
+import edu.bhcc.bim.model.User;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
@@ -48,6 +51,21 @@ public class WebSocketManager {
                         return Message.class;
                     }
                 });
+
+                stompSession.subscribe(
+                        "/topic/friend/requests/" + appState.getCurrentUser().getUsername(),
+                        new StompSessionHandlerAdapter() {
+                            @Override
+                            public void handleFrame(StompHeaders headers, Object payload) {
+                                BuddyListController buddyListController = appState.getBuddyListController();
+                                buddyListController.addFriendToBuddyList((User) payload);
+                            }
+
+                            @Override
+                            public Type getPayloadType(StompHeaders headers) {
+                                return User.class;
+                            }
+                        });
             }
 
             @Override
@@ -87,6 +105,17 @@ public class WebSocketManager {
             try {
                 System.out.println("Sending message: " + message);
                 stompSession.send("/app/message/" + recipientId, message); // Adjust this line
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void sendFriendRequest(Friendship friendship, String username) {
+        if (stompSession != null && stompSession.isConnected()) {
+            try {
+                System.out.println("Sending friend request: " + friendship);
+                stompSession.send("/app/friend/request/" + username, friendship);
             } catch (Exception e) {
                 e.printStackTrace();
             }

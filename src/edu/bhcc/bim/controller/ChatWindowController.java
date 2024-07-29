@@ -1,6 +1,7 @@
 package edu.bhcc.bim.controller;
 
 import edu.bhcc.bim.websocket.WebSocketManager;
+import edu.bhcc.bim.model.User;
 import edu.bhcc.bim.model.Conversation;
 import edu.bhcc.bim.model.Message;
 import edu.bhcc.bim.state.AppState;
@@ -85,9 +86,10 @@ public class ChatWindowController {
 
         // Create the message object
         Message newMessage = new Message();
+        User sender = appState.getUserMap().get(appState.getUserId());
         newMessage.setContent(content);
-        newMessage.setSender("janedoe");
-        newMessage.setSenderId(appState.getUserId());
+        newMessage.setSender(sender.getUsername());
+        newMessage.setSenderId(sender.getUserId());
         newMessage.setConversationId(conversation.getConversationId());
 
         // Send the message via WebSocket
