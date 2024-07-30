@@ -30,11 +30,11 @@ public class LoginController {
 
         usernameField = new TextField();
         usernameField.setPromptText("Username");
-        usernameField.setText("TestUser");
+        // usernameField.setText("TestUser"); // Set default username for testing
 
         passwordField = new PasswordField();
         passwordField.setPromptText("Password");
-        passwordField.setText("password");
+        // passwordField.setText("password"); // Set default password for testing
 
         loginButton = new Button("Login");
         loginButton.setOnAction(event -> login());

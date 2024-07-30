@@ -24,6 +24,9 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 
 public class WebSocketManager {
+    private static final String HOST = AppState.HOST;
+    private static final String PORT = AppState.PORT;
+
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
     private AppState appState;
@@ -40,7 +43,7 @@ public class WebSocketManager {
         stompClient = new WebSocketStompClient(client);
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
         System.out.println("Connecting to WebSocket server");
-        stompClient.connect("ws://localhost:8080/ws", new StompSessionHandlerAdapter() {
+        stompClient.connect("ws://" + HOST + ":" + PORT + "/ws", new StompSessionHandlerAdapter() {
             @Override
             public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
                 stompSession = session;
