@@ -42,4 +42,13 @@ public class Friendship {
     public enum Status {
         PENDING, ACCEPTED, BLOCKED
     }
+
+    @Override
+    public String toString() {
+        return "Friendship{" +
+                "fromUserId=" + fromUserId +
+                ", toUserId=" + toUserId +
+                ", status=" + status +
+                '}';
+    }
 }

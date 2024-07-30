@@ -18,9 +18,11 @@ import edu.bhcc.bim.model.Conversation;
 import edu.bhcc.bim.model.FriendListViewItem;
 import edu.bhcc.bim.model.Friendship;
 import edu.bhcc.bim.model.User;
+import edu.bhcc.bim.model.UserStatus;
 import edu.bhcc.bim.service.ConversationService;
 import edu.bhcc.bim.service.FriendService;
 import edu.bhcc.bim.state.AppState;
+import edu.bhcc.bim.websocket.WebSocketManager;
 
 import java.util.List;
 
@@ -92,8 +94,8 @@ public class BuddyListController {
     private void loadFriendsAndConversations() {
         new Thread(() -> {
             try {
-                List<User> friends = FriendService.getFriendsWithStatus(appState.getUserId());
                 List<Conversation> conversations = ConversationService.getConversations(appState.getUserId());
+                List<User> friends = FriendService.getFriendsWithStatus(appState.getUserId());
 
                 Platform.runLater(() -> {
                     acceptedFriendsOnlineListView.getItems().clear();
@@ -101,8 +103,12 @@ public class BuddyListController {
                     pendingFriendsReceivedListView.getItems().clear();
                     pendingFriendsSentListView.getItems().clear();
                     blockedFriendsListView.getItems().clear();
-                    for (User friend : friends)
+                    for (User friend : friends) {
+                        appState.addUser(friend);
                         addFriendToBuddyList(friend);
+                        WebSocketManager webSocketManager = appState.getWebSocketManager();
+                        webSocketManager.subscribeToFriendStatus(friend.getUserId());
+                    }
 
                     for (Conversation conversation : conversations) {
                         int userId = conversation.getParticipant().getUserId();
@@ -162,7 +168,7 @@ public class BuddyListController {
         Platform.runLater(() -> {
             Friendship.Status friendStatus = friend.getFriendship().getStatus();
             if (friendStatus.equals(Friendship.Status.ACCEPTED)) {
-                if (friend.getStatus().equals("OFFLINE"))
+                if (friend.getUserStatus().getStatus() == UserStatus.Status.OFFLINE)
                     acceptedFriendsOfflineListView.getItems().add(new FriendListViewItem(friend));
                 else
                     acceptedFriendsOnlineListView.getItems().add(new FriendListViewItem(friend));
@@ -173,6 +179,30 @@ public class BuddyListController {
                     pendingFriendsReceivedListView.getItems().add(new FriendListViewItem(friend));
             } else if (friendStatus.equals(Friendship.Status.BLOCKED)) {
                 blockedFriendsListView.getItems().add(new FriendListViewItem(friend));
+            }
+        });
+    }
+
+    public void removeFriendFromBuddyList(Friendship friendship, UserStatus userStatus, Integer friendId) {
+        Platform.runLater(() -> {
+            Friendship.Status friendStatus = friendship.getStatus();
+            if (friendStatus.equals(Friendship.Status.ACCEPTED)) {
+                if (userStatus.getStatus() == UserStatus.Status.OFFLINE)
+                    acceptedFriendsOfflineListView.getItems()
+                            .removeIf(friendItem -> friendItem.getFriend().getUserId().equals(friendId));
+                else
+                    acceptedFriendsOnlineListView.getItems()
+                            .removeIf(friendItem -> friendItem.getFriend().getUserId().equals(friendId));
+            } else if (friendStatus.equals(Friendship.Status.PENDING)) {
+                if (friendship.getFromUserId() == appState.getUserId())
+                    pendingFriendsSentListView.getItems()
+                            .removeIf(friendItem -> friendItem.getFriend().getUserId().equals(friendId));
+                else
+                    pendingFriendsReceivedListView.getItems()
+                            .removeIf(friendItem -> friendItem.getFriend().getUserId().equals(friendId));
+            } else if (friendStatus.equals(Friendship.Status.BLOCKED)) {
+                blockedFriendsListView.getItems()
+                        .removeIf(friendItem -> friendItem.getFriend().getUserId().equals(friendId));
             }
         });
     }

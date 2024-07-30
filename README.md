@@ -1,18 +1,68 @@
+# BHCC Instant Messenger (BIM) Frontend
+
 ## Getting Started
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+This guide will help you compile and run the messenger app on both Unix-like systems and Windows.
 
-## Folder Structure
+### Prerequisites
 
-The workspace contains two folders by default, where:
+- Java Development Kit (JDK)
+- Ensure that the backend server is running. You can find the backend repository [here](https://github.com/backend-repo).
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+## Configuration
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+The application uses a `.env` file for configuration. You need to create this file in the project root directory and define the backend server's host and port.
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+### Example `.env` File
 
-## Dependency Management
+Create a `.env` file in the project root directory and add the following content:
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+```dotenv
+HOST={host}
+PORT={port}
+```
+
+### Running on Unix-like Systems
+
+To compile and run the app on Unix-like systems (Linux, macOS), use the provided `run.sh` script.
+
+#### Steps:
+
+1. Open your terminal.
+2. Navigate to the project directory.
+3. Ensure `run.sh` has execute permissions. If not, you can add them using:
+
+   ```sh
+   chmod +x run.sh
+   ```
+
+4. Run the script:
+
+   ```sh
+   ./run.sh
+   ```
+
+### Running on Windows
+
+To compile and run the app on Windows, use the `run.bat` script.
+
+#### Steps:
+
+1. Open Command Prompt.
+2. Navigate to the project directory.
+3. Run the script:
+   ```cmd
+   run.bat
+   ```
+
+### What Happens When You Run the Scripts
+
+When you run either script, it will start two instances of the Buddy List App. Here is what you can do with the two instances:
+
+1. **Create Accounts**: Enter a username and password to create an account in each instance.
+2. **Add a Friend**: Use one instance to add the other instance's user as a friend.
+3. **Accept Friend Request**: Switch to the other instance to accept the friend request.
+4. **Send Messages**: Message the other user you created.
+5. **Test Online/Offline Status**: Log in and out in each instance to see how the user moves between the offline and online lists.
+
+For any issues or contributions, please refer to the repository on [GitHub](https://github.com/your-repo-link).

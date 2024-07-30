@@ -8,28 +8,33 @@ import edu.bhcc.bim.model.Conversation;
 import edu.bhcc.bim.model.Friendship;
 import edu.bhcc.bim.model.Message;
 import edu.bhcc.bim.model.User;
+import edu.bhcc.bim.model.UserStatus;
 import edu.bhcc.bim.state.AppState;
 
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.StompSession.Subscription;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
 
 public class WebSocketManager {
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
     private AppState appState;
+    private HashMap<Integer, Subscription> friendSubscriptions;
 
     public WebSocketManager(AppState appState) {
         this.appState = appState;
     }
 
     public void start() {
+        friendSubscriptions = new HashMap<>();
         System.out.println("Starting WebSocket connection");
         StandardWebSocketClient client = new StandardWebSocketClient();
         stompClient = new WebSocketStompClient(client);
@@ -98,6 +103,44 @@ public class WebSocketManager {
             }
 
         });
+    }
+
+    public void subscribeToFriendStatus(Integer friendId) {
+        if (stompSession != null && stompSession.isConnected()) {
+            System.out.println("Subscribing to friend status: " + friendId);
+            String destination = "/topic/user/status/" + friendId;
+            Subscription subscription = stompSession.subscribe(destination, new StompFrameHandler() {
+                @Override
+                public Type getPayloadType(StompHeaders headers) {
+                    return UserStatus.class; // Ensure this is the correct payload type
+                }
+
+                @Override
+                public void handleFrame(StompHeaders headers, Object payload) {
+                    Platform.runLater(() -> {
+                        UserStatus userStatus = (UserStatus) payload;
+                        User friend = appState.getUserMap().get(friendId);
+                        BuddyListController buddyListController = appState.getBuddyListController();
+                        UserStatus oldUserStatus = new UserStatus(friendId, friend.getUserStatus().getStatus());
+                        buddyListController.removeFriendFromBuddyList(friend.getFriendship(), oldUserStatus, friendId);
+                        appState.getUserMap().get(friendId).setUserStatus(userStatus);
+                        appState.updateUserStatus(friendId, userStatus);
+                        buddyListController.addFriendToBuddyList(friend);
+                        System.out.println("Received status for user " + friendId + ": " + userStatus);
+                    });
+                }
+            });
+            friendSubscriptions.put(friendId, subscription);
+        } else {
+            System.err.println("Stomp session is not connected. Cannot subscribe to friend status.");
+        }
+    }
+
+    public void unsubscribeFromFriendStatus(Integer friendId) {
+        Subscription subscription = friendSubscriptions.remove(friendId);
+        if (subscription != null) {
+            subscription.unsubscribe();
+        }
     }
 
     private void handleMessage(Message message) {

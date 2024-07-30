@@ -3,21 +3,21 @@ package edu.bhcc.bim.model;
 public class User {
     private Integer userId;
     private String username;
-    private String status;
+    private UserStatus userStatus;
     private String lastActive;
     private Friendship friendship;
 
     public User() {
     }
 
-    public User(Integer userId, String username, String status, String lastActive) {
-        this(userId, username, status, lastActive, null);
+    public User(Integer userId, String username, UserStatus userStatus, String lastActive) {
+        this(userId, username, userStatus, lastActive, null);
     }
 
-    public User(Integer userId, String username, String status, String lastActive, Friendship friendship) {
+    public User(Integer userId, String username, UserStatus userStatus, String lastActive, Friendship friendship) {
         this.userId = userId;
         this.username = username;
-        this.status = status;
+        this.userStatus = userStatus;
         this.lastActive = lastActive;
         this.friendship = friendship;
     }
@@ -38,12 +38,12 @@ public class User {
         this.username = username;
     }
 
-    public String getStatus() {
-        return status;
+    public UserStatus getUserStatus() {
+        return userStatus;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setUserStatus(UserStatus userStatus) {
+        this.userStatus = userStatus;
     }
 
     public String getLastActive() {
@@ -60,5 +60,20 @@ public class User {
 
     public void setFriendship(Friendship friendship) {
         this.friendship = friendship;
+    }
+
+    public enum Status {
+        ONLINE, OFFLINE, AWAY, BUSY
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userId=" + userId +
+                ", username='" + username + '\'' +
+                ", userStatus='" + userStatus + '\'' +
+                ", lastActive='" + lastActive + '\'' +
+                ", friendship=" + friendship +
+                '}';
     }
 }

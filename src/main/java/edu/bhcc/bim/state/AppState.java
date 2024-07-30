@@ -7,12 +7,21 @@ import edu.bhcc.bim.controller.ChatWindowController;
 import edu.bhcc.bim.model.Conversation;
 import edu.bhcc.bim.model.Message;
 import edu.bhcc.bim.model.User;
+import edu.bhcc.bim.model.UserStatus;
 import edu.bhcc.bim.websocket.WebSocketManager;
+import edu.bhcc.bim.model.Friendship;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+import io.github.cdimascio.dotenv.Dotenv;
 
 public class AppState {
+    private static final Dotenv dotenv = Dotenv.load();
+    public static final String HOST = dotenv.get("HOST");
+    public static final String PORT = dotenv.get("PORT");
+
     private int userId;
     private ObservableList<User> users;
     private ObservableList<Conversation> conversations;
@@ -109,13 +118,35 @@ public class AppState {
         }
     }
 
-    public void updateUserStatus(Integer userId, String status) {
+    public void updateUserStatus(Integer userId, UserStatus status) {
         for (User user : users) {
             if (user.getUserId().equals(userId)) {
-                user.setStatus(status);
+                user.setUserStatus(status);
                 break;
             }
         }
+    }
+
+    public List<User> getFriends() {
+        List<User> filteredUsers = new ArrayList<>();
+        System.out.println("Users list size: " + users.size());
+
+        for (User user : users) {
+            System.out.println("User: " + user);
+            if (user.getFriendship() != null) {
+                System.out.println("User: " + user.getUsername() + ", Status: " + user.getFriendship().getStatus());
+                if (user.getFriendship().getStatus() == Friendship.Status.ACCEPTED) {
+                    System.out.println(
+                            "Filtering user: " + user.getUsername() + ", Status: " + user.getFriendship().getStatus());
+                    filteredUsers.add(user);
+                }
+            } else {
+                System.out.println("User: " + user.getUsername() + " has no friendship status.");
+            }
+        }
+
+        System.out.println("Getting friends " + filteredUsers.size());
+        return filteredUsers;
     }
 
     // Other state management methods
