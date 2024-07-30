@@ -1,0 +1,25 @@
+.list-view {
+  -fx-background-color: transparent;
+}
+
+.list-view .cell {
+  -fx-padding: 4.5px 4.5px 4.5px 25px;
+}
+
+.list-view .cell:odd {
+  -fx-background-color: transparent;
+}
+
+.list-view .cell:even {
+  -fx-background-color: transparent;
+}
+
+.list-view .cell:hover {
+  -fx-cursor: hand;
+  -fx-underline: true;
+}
+
+.list-view .cell:selected {
+  -fx-background-color: #b0b8d6;
+  -fx-text-fill: #000;
+}

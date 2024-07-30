@@ -6,7 +6,7 @@ public class FriendListViewItem {
 
     public FriendListViewItem(User friend) {
         this.friend = friend;
-        this.displayName = friend.getUsername() + " (" + friend.getStatus() + ")";
+        this.displayName = friend.getUsername();
     }
 
     public String getDisplayName() {

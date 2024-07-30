@@ -1,0 +1,5 @@
+/* Custom style */
+.buddylist-vbox {
+  -fx-background-color: #7289da;
+  -fx-padding: 8px;
+}

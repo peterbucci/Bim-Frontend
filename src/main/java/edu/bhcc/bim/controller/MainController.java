@@ -1,10 +1,9 @@
 package edu.bhcc.bim.controller;
 
-import edu.bhcc.bim.state.AppState;
-
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import edu.bhcc.bim.state.AppState;
 
 public class MainController {
     private Stage primaryStage;
@@ -19,9 +18,16 @@ public class MainController {
     public void setView(String viewName) {
         Pane view = createView(viewName);
         currentScene = new Scene(view, 300, 600);
+        currentScene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+        currentScene.getStylesheets().add(getClass().getResource("/TabPaneStyle.css").toExternalForm());
+        currentScene.getStylesheets().add(getClass().getResource("/AccordionStyle.css").toExternalForm());
+        currentScene.getStylesheets().add(getClass().getResource("/ListViewStyle.css").toExternalForm());
+        currentScene.getStylesheets().add(getClass().getResource("/VBoxStyle.css").toExternalForm());
+
         primaryStage.setScene(currentScene);
         primaryStage.setTitle(viewName);
         primaryStage.show();
+
     }
 
     private Pane createView(String viewName) {

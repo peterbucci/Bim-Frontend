@@ -46,4 +46,13 @@ public class Conversation {
     public enum ConversationType {
         GROUP, ONE_ON_ONE
     }
+
+    @Override
+    public String toString() {
+        return "Conversation{" +
+                "conversationId=" + conversationId +
+                ", participant=" + participant +
+                ", messages=" + messages +
+                '}';
+    }
 }

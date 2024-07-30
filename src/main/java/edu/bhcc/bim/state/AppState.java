@@ -1,13 +1,13 @@
 package edu.bhcc.bim.state;
 
-import edu.bhcc.bim.model.User;
-import edu.bhcc.bim.websocket.WebSocketManager;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import edu.bhcc.bim.controller.BuddyListController;
 import edu.bhcc.bim.controller.ChatWindowController;
 import edu.bhcc.bim.model.Conversation;
 import edu.bhcc.bim.model.Message;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import edu.bhcc.bim.model.User;
+import edu.bhcc.bim.websocket.WebSocketManager;
 
 import java.util.HashMap;
 import java.util.Map;

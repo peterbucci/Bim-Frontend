@@ -1,10 +1,5 @@
 package edu.bhcc.bim.controller;
 
-import edu.bhcc.bim.websocket.WebSocketManager;
-import edu.bhcc.bim.model.User;
-import edu.bhcc.bim.model.Conversation;
-import edu.bhcc.bim.model.Message;
-import edu.bhcc.bim.state.AppState;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -15,6 +10,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import edu.bhcc.bim.model.Conversation;
+import edu.bhcc.bim.model.Message;
+import edu.bhcc.bim.model.User;
+import edu.bhcc.bim.state.AppState;
+import edu.bhcc.bim.websocket.WebSocketManager;
 
 public class ChatWindowController {
     private AppState appState;
@@ -35,6 +35,7 @@ public class ChatWindowController {
 
         messagesListView = new ListView<>();
         messageInput = new TextArea();
+        messageInput.setWrapText(true);
         Button sendButton = new Button("Send");
 
         root.getChildren().addAll(messagesListView, messageInput, sendButton);
@@ -56,7 +57,8 @@ public class ChatWindowController {
                         super.updateItem(item, empty);
                         if (item != null && !empty) {
                             text = new Text(item.getSender() + ": " + item.getContent());
-                            text.wrappingWidthProperty().bind(param.widthProperty().subtract(20)); // Set wrapping width
+                            text.wrappingWidthProperty().bind(param.widthProperty().subtract(35)); // Set wrapping
+                                                                                                   // width
                             setGraphic(text);
                         } else {
                             setGraphic(null);
@@ -105,19 +107,19 @@ public class ChatWindowController {
         Platform.runLater(() -> messagesListView.scrollTo(messagesListView.getItems().size() - 1));
     }
 
-    public void show() {
-        stage.show();
-    }
-
-    public Stage getStage() {
-        return stage;
-    }
-
     public void addMessage(Message message) {
         Platform.runLater(() -> {
             appState.addMessage(message, conversation.getParticipant().getUserId());
             messagesListView.getItems().add(message);
             messagesListView.scrollTo(messagesListView.getItems().size() - 1);
         });
+    }
+
+    public void show() {
+        stage.show();
+    }
+
+    public Stage getStage() {
+        return stage;
     }
 }

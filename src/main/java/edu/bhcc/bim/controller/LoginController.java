@@ -1,14 +1,14 @@
 package edu.bhcc.bim.controller;
 
-import edu.bhcc.bim.service.AuthService;
-import edu.bhcc.bim.model.User;
-import edu.bhcc.bim.state.AppState;
-import edu.bhcc.bim.util.HashUtil;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import edu.bhcc.bim.model.User;
+import edu.bhcc.bim.service.AuthService;
+import edu.bhcc.bim.state.AppState;
+import edu.bhcc.bim.util.HashUtil;
 
 public class LoginController {
     private VBox loginPane;
@@ -30,9 +30,11 @@ public class LoginController {
 
         usernameField = new TextField();
         usernameField.setPromptText("Username");
+        usernameField.setText("TestUser");
 
         passwordField = new PasswordField();
         passwordField.setPromptText("Password");
+        passwordField.setText("password");
 
         loginButton = new Button("Login");
         loginButton.setOnAction(event -> login());

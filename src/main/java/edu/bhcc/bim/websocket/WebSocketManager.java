@@ -1,15 +1,17 @@
 package edu.bhcc.bim.websocket;
 
-import edu.bhcc.bim.controller.BuddyListController;
-import edu.bhcc.bim.controller.ChatWindowController;
-import edu.bhcc.bim.model.Message;
-import edu.bhcc.bim.state.AppState;
-import edu.bhcc.bim.model.Friendship;
-import edu.bhcc.bim.model.User;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import edu.bhcc.bim.controller.BuddyListController;
+import edu.bhcc.bim.controller.ChatWindowController;
+import edu.bhcc.bim.model.Conversation;
+import edu.bhcc.bim.model.Friendship;
+import edu.bhcc.bim.model.Message;
+import edu.bhcc.bim.model.User;
+import edu.bhcc.bim.state.AppState;
 
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
@@ -37,6 +39,7 @@ public class WebSocketManager {
             @Override
             public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
                 stompSession = session;
+                sendStatus("ONLINE");
                 System.out.println("WebSocket connected");
 
                 // Subscribe to the user-specific topic
@@ -52,13 +55,34 @@ public class WebSocketManager {
                     }
                 });
 
+                stompSession.subscribe("/topic/conversations/" + appState.getUserId(), new StompFrameHandler() {
+                    @Override
+                    public void handleFrame(StompHeaders headers, Object payload) {
+                        System.out.println("Received conversation");
+                        Conversation conversation = (Conversation) payload;
+                        appState.getConversationMap().put(conversation.getParticipant().getUserId(), conversation);
+                    }
+
+                    @Override
+                    public Type getPayloadType(StompHeaders headers) {
+                        return Conversation.class;
+                    }
+                });
+
                 stompSession.subscribe(
                         "/topic/friend/requests/" + appState.getCurrentUser().getUsername(),
                         new StompSessionHandlerAdapter() {
                             @Override
                             public void handleFrame(StompHeaders headers, Object payload) {
+                                User user = (User) payload;
+                                Friendship friendship = user.getFriendship();
+                                Friendship.Status status = friendship.getStatus();
                                 BuddyListController buddyListController = appState.getBuddyListController();
-                                buddyListController.addFriendToBuddyList((User) payload);
+                                buddyListController.addFriendToBuddyList(user);
+                                if (status == Friendship.Status.ACCEPTED) {
+                                    Boolean isSender = friendship.getFromUserId().equals(appState.getUserId());
+                                    buddyListController.removePendingFriend(user, isSender);
+                                }
                             }
 
                             @Override
@@ -72,6 +96,7 @@ public class WebSocketManager {
             public void handleTransportError(StompSession session, Throwable exception) {
                 exception.printStackTrace();
             }
+
         });
     }
 
@@ -83,8 +108,8 @@ public class WebSocketManager {
                 chatWindow.toFront();
                 chatWindow.requestFocus();
             } else {
-                chatWindowController = new ChatWindowController(
-                        appState.getConversationMap().get(message.getSenderId()), appState);
+                Conversation conversation = appState.getConversationMap().get(message.getSenderId());
+                chatWindowController = new ChatWindowController(conversation, appState);
                 Stage chatWindow = chatWindowController.getStage();
                 chatWindowController.show();
 
@@ -122,9 +147,26 @@ public class WebSocketManager {
         }
     }
 
+    private void sendStatus(String status) {
+        if (stompSession != null && stompSession.isConnected()) {
+            try {
+                System.out.println("Sending status: " + status);
+                stompSession.send("/app/user/status/" + appState.getUserId(), status);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void stop() {
         if (stompSession != null) {
-            stompSession.disconnect();
+            try {
+                sendStatus("OFFLINE");
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                stompSession.disconnect();
+            }
         }
     }
 }

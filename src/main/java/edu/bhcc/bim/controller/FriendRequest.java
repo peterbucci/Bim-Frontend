@@ -1,8 +1,5 @@
 package edu.bhcc.bim.controller;
 
-import edu.bhcc.bim.state.AppState;
-import edu.bhcc.bim.websocket.WebSocketManager;
-import edu.bhcc.bim.model.Friendship;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -11,6 +8,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import edu.bhcc.bim.model.Friendship;
+import edu.bhcc.bim.state.AppState;
+import edu.bhcc.bim.websocket.WebSocketManager;
 
 public class FriendRequest {
 

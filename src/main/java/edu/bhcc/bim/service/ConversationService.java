@@ -1,10 +1,11 @@
 package edu.bhcc.bim.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.List;
 
 import edu.bhcc.bim.model.Conversation;
 import edu.bhcc.bim.util.HttpClientHelper;
+
+import java.util.List;
 
 public class ConversationService {
 

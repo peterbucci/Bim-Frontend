@@ -71,4 +71,16 @@ public class Message {
     public void setSenderId(Integer senderId) {
         this.senderId = senderId;
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "messageId=" + messageId +
+                ", conversationId=" + conversationId +
+                ", content='" + content + '\'' +
+                ", sentAt=" + sentAt +
+                ", sender='" + sender + '\'' +
+                ", senderId=" + senderId +
+                '}';
+    }
 }

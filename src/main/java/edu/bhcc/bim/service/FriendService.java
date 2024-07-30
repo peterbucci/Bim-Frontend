@@ -1,8 +1,10 @@
 package edu.bhcc.bim.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.bhcc.bim.model.User;
 import edu.bhcc.bim.util.HttpClientHelper;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.List;
 
 public class FriendService {
