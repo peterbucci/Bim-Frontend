@@ -7,7 +7,7 @@ This guide will help you compile and run the messenger app on both Unix-like sys
 ### Prerequisites
 
 - Java Development Kit (JDK)
-- Ensure that the backend server is running. You can find the backend repository [here](https://github.com/backend-repo).
+- Ensure that the backend server is running. You can find the backend repository [here](https://github.com/peterbucci/BIM-Backend).
 
 ## Configuration
 
