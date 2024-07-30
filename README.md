@@ -65,4 +65,4 @@ When you run either script, it will start two instances of the Buddy List App. H
 4. **Send Messages**: Message the other user you created.
 5. **Test Online/Offline Status**: Log in and out in each instance to see how the user moves between the offline and online lists.
 
-For any issues or contributions, please refer to the repository on [GitHub](https://github.com/your-repo-link).
+For any issues or contributions, please refer to the repository on [GitHub](https://github.com/peterbucci/Bim-Frontend).
